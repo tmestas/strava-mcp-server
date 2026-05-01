@@ -26,12 +26,26 @@ from auth import get_authorization_url, exchange_code
 from strava_client import strava_client
 from token_manager import token_manager
 from config import settings  # noqa: F401 — imported to validate .env on startup
+from token_store import token_store
 
 logging.basicConfig(
     filename=r"C:\Users\tanne\Code\projects\strava-mcp-server\debug.log",
     level=logging.DEBUG,
     format="%(asctime)s %(message)s"
 )
+
+def ensure_authenticated():
+    tokens = token_store.get_tokens()
+    if not tokens["access_token"] or not tokens["refresh_token"]:
+        logging.debug(
+            "No Strava tokens found. Ask Claude to call "
+            "get_strava_auth_url to begin authentication."
+        )
+        return
+    token_manager.update_from_token_response(tokens)
+    logging.debug("Tokens loaded successfully")
+
+ensure_authenticated()
 
 mcp = FastMCP("Strava MCP", json_response=True)
 
