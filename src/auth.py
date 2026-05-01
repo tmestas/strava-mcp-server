@@ -18,6 +18,8 @@ ScopeType = Literal["read", "read_all", "profile:read_all", "profile:write", "ac
 STRAVA_SCOPES: list[ScopeType] = ["read", "activity:read_all", "profile:read_all"]
 
 
+
+
 def get_authorization_url(scope: list[ScopeType] | None = None) -> str:
     if scope is None:
         scope = STRAVA_SCOPES
