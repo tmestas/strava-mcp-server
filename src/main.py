@@ -37,10 +37,13 @@ logging.basicConfig(
 def ensure_authenticated():
     tokens = token_store.get_tokens()
     if not tokens["access_token"] or not tokens["refresh_token"]:
-        logging.debug("No tokens found — visit http://localhost:8000/auth to authenticate")
+        logging.debug(
+            "No Strava tokens found. Ask Claude to call "
+            "get_strava_auth_url to begin authentication."
+        )
         return
     token_manager.update_from_token_response(tokens)
-    logging.debug("Tokens loaded from store")
+    logging.debug("Tokens loaded successfully")
 
 ensure_authenticated()
 
