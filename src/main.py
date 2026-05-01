@@ -26,8 +26,7 @@ from auth import get_authorization_url, exchange_code
 from strava_client import strava_client
 from token_manager import token_manager
 from config import settings  # noqa: F401 — imported to validate .env on startup
-import threading
-from callback_server import run_oauth_flow
+from token_store import token_store
 
 logging.basicConfig(
     filename=r"C:\Users\tanne\Code\projects\strava-mcp-server\debug.log",
@@ -36,18 +35,12 @@ logging.basicConfig(
 )
 
 def ensure_authenticated():
-    """Check if we have valid tokens, if not kick off the OAuth flow."""
-    if not settings.STRAVA_ACCESS_TOKEN or not settings.STRAVA_REFRESH_TOKEN:
-        logging.debug("No tokens found — starting OAuth flow...")
-        run_oauth_flow()
-    else:
-        # Load existing tokens into the client
-        token_manager.update_from_token_response({
-            "access_token": settings.STRAVA_ACCESS_TOKEN,
-            "refresh_token": settings.STRAVA_REFRESH_TOKEN,
-            "expires_at": 0,  # stravalib will refresh if expired
-        })
-
+    tokens = token_store.get_tokens()
+    if not tokens["access_token"] or not tokens["refresh_token"]:
+        logging.debug("No tokens found — visit http://localhost:8000/auth to authenticate")
+        return
+    token_manager.update_from_token_response(tokens)
+    logging.debug("Tokens loaded from store")
 
 ensure_authenticated()
 
